@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试联系表单</title>
+</head>
+<body>
+    <h1>测试联系表单</h1>
+    <form id="testForm">
+        <div>
+            <label for="name">姓名:</label>
+            <input type="text" id="name" name="name" value="测试用户" required>
+        </div>
+        <div>
+            <label for="email">邮箱:</label>
+            <input type="email" id="email" name="email" value="test@example.com" required>
+        </div>
+        <div>
+            <label for="message">消息:</label>
+            <textarea id="message" name="message" rows="3" required>这是一条测试消息</textarea>
+        </div>
+        <button type="submit">提交测试</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = '正在发送...';
+            
+            try {
+                const formData = new FormData(this);
+                const data = {
+                    name: formData.get('name'),
+                    email: formData.get('email'),
+                    message: formData.get('message')
+                };
+                
+                console.log('发送的数据:', data);
+                
+                const response = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                console.log('响应状态:', response.status);
+                
+                const result = await response.json();
+                console.log('响应结果:', result);
+                
+                if (response.ok) {
+                    resultDiv.textContent = '成功: ' + (result.message || '消息发送成功');
+                    resultDiv.style.color = 'green';
+                } else {
+                    resultDiv.textContent = '错误: ' + (result.error || '请求失败');
+                    resultDiv.style.color = 'red';
+                }
+            } catch (error) {
+                console.error('错误:', error);
+                resultDiv.textContent = '网络错误: ' + error.message;
+                resultDiv.style.color = 'red';
+            }
+        });
+    </script>
+</body>
+</html>
